@@ -1,4 +1,4 @@
-::: mermaid
+```mermaid
     flowchart LR
 
     A[Sistema] -->B{Resultado}
@@ -9,4 +9,4 @@
     D--> H(Desconto do Saldo)
     H--> J(Carteira)
     
-:::
+```
