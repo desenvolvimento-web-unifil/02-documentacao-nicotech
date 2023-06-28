@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Unibet</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
+    </head>
+<body>
+    {% include 'partials/header.html' %}
+    <div class="container-sm my-5">
+        <div class="row align-items-start text-center">
+            <div class="col">
+                <h3><strong>Carteira</strong></h3>
+            </div>
+            <div class="col">
+                <h3><strong>Saldo Atual:  {% for carteira in carteiras %}{{ carteira.valor }}{% endfor %}</strong></h3>
+            </div>
+        </div>
+    </div>
+    <div class="container-sm my-5">
+        <div class="row align-items-start text-center">
+            <div class="col" style="border-right: 2px solid black">
+                {% for carteira in carteiras %}
+                <form method="POST" action="{% url 'sacar' %}">
+                    {% csrf_token %}
+                    <input type="text" name="id-carteira-sac" id="id-carteira-sac" value="{{ carteira.id_carteira }}" hidden>
+                    <input type="text" name="saldo-atual" id="saldo-atual" value="{{ carteira.valor }}" hidden>
+                    <h4>Sacar dinheiro</h4>
+                    <input type="text" name="sacar-input" id="sacar-input" class="form-control">
+                    <input type="text" name="saldo-novo" id="saldo-novo" class="form-control my-3" readonly>
+                    <button type="submit" id="sacar-btn" class="btn btn-primary" style="background-color: #D17A22 !important; border: #D17A22 !important;">Sacar</button>
+                    <button type="button" id="saldo-btn" class="btn btn-primary" style="background-color: #D17A22 !important; border: #D17A22 !important;">Gerar Saldo</button>
+                </form>
+                {% endfor %}
+            </div>
+            <div class="col">
+                {% for carteira in carteiras %}
+                <form method="POST" action="{% url 'depositar' %}">
+                    {% csrf_token %}
+                    <input type="text" name="id-carteira-dep" id="id-carteira-dep" value="{{ carteira.id_carteira }}" hidden>
+                    <h4>Depositar dinheiro</h4>
+                    <input type="text" name="depositar-input" id="depositar-input" class="form-control">
+                    <button type="submit" id="depositar-btn" class="btn btn-primary my-3" style="background-color: #D17A22 !important; border: #D17A22 !important;">Depositar</button>
+                </form>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% load static %}
+    <script src="{% static 'app_unibet/carteira.js' %}"></script>
+</body>
+

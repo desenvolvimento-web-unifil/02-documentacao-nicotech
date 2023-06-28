@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Unibet</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    {% include 'partials/header.html' %}
+    <main>
+        <form method="get" action="{% url 'apostas' %}">
+            <div class="params container-sm my-5">
+                <label class="bold" for="campeonato">Campeonato:</label>
+                <select class="form-control" name="campeonato" id="campeonato">
+                    <option value="71" {% if response.0.partida.info.league_id == 71 %} selected {% endif %}>Brasileirão Série A</option>
+                    <option value="72" {% if response.0.partida.info.league_id == 72 %} selected {% endif %}>Brasileirão Série B</option>
+                    <option value="13" {% if response.0.partida.info.league_id == 13 %} selected {% endif %}>Libertadores</option>
+                </select>
+                <label class="bold" for="data">Data:</label>
+                {% with response.0.partida.info.date as datetime %}
+                    {% with datetime|slice:":10" as date %}
+                        <input type="date" class="form-control" id="data" name="data" value="{{ date }}">
+                    {% endwith %}
+                {% endwith %}
+                <button style="background-color: #D17A22 !important; border: #D17A22 !important;" type="submit" class="btn btn-primary my-3">GO</button>
+            </div>
+        </form>
+        <div class="container-sm ">
+             {% for data in response %}
+            <div class="card my-5">
+                <input type="text" name="id_fixture" id="id_fixture" value="{{data.partida.fixture_id}}" hidden>
+                <p class="p-4">{{data.partida.status.long}}</p>
+                <div class="d-flex justify-content-center">
+                    <div class=" justify-content-center m-5">
+                        <img src="{{data.partida.teams.home.logo}}" alt="{{data.partida.teams.home.name}}" class="mb-3 img-fluid w-50">
+                        <p class="bold">{{data.partida.teams.home.name}}</p>
+                    </div>
+                    <span class="bold  justify-content-center m-5">VS</span>
+                    <div class=" team justify-content-center m-5">
+                        <img src="{{data.partida.teams.away.logo}}" alt="{{data.partida.teams.away.name}}" class="mb-3 img-fluid w-50">
+                        <p class="bold">{{data.partida.teams.away.name}}</p>
+                    </div>
+                </div>
+                <ul class="list-group list-group-horizontal justify-content-center">
+                {% if data.partida.status.short == 'NS' %}
+                    <button type="submit" 
+                    class="btn btn-secondary mx-3 mb-3" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#modal-partida" 
+                    {% for odd in data.partida.odds %} 
+                    data-odd-{{odd.value}}="{{odd.odd}}" 
+                    {% endfor %}
+                    data-id-partida="{{data.partida.fixture_id}}"
+                    data-team-home="{{data.partida.teams.home.name}}" 
+                    data-team-away="{{data.partida.teams.away.name}}" 
+                    data-id-league="{{data.partida.info.league_id}}"
+                    data-date="{{data.partida.info.date}}"
+                    data-carteira="{{data.carteiras.valor}}"
+                    >
+                        APOSTAR
+                    </button>
+                {% endif %}
+                {% if data.partida.status.short == 'FT' %}
+                    <p style="color: red; font-size: 18px; font-weight: 700;">JOGO ENCERRADO</p>
+                {% endif %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="modal fade" id="modal-partida" tabindex="-1" aria-labelledby="modal-partida-label" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modal-partida-label">Apostar</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h5>Informações da Partida:</h5>
+                        <div class="container flex-column text-center justify-content-center align-items-center">
+                            <div class="d-flex justify-content-center">
+                                <div class=" justify-content-center m-5">
+                                    <p id="modal-team-home-name"></p>
+                                </div>
+                                <span class="bold  justify-content-center m-5">VS</span>
+                                <div class=" team justify-content-center m-5">
+                                    <p id="modal-team-away-name"></p>
+                                </div>
+                            </div>
+                            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                                <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="btnradio1">Home <span id="modal-odd-home"></span></label>
+                            
+                                <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="btnradio2">Draw <span id="modal-odd-draw"></span></label>
+                            
+                                <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="btnradio3">Away <span id="modal-odd-away"></span></label>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <div id="content" class="modal-content my-5 w-50">
+                                    <form method="post" action="{% url 'registrar_aposta' %}" id="form-aposta">
+                                        {% csrf_token %}
+                                        <input type="text" name="input-id-carteira" id="input-id-carteira" hidden>
+                                        <input type="text" name="input-id-partida" id="input-id-partida" hidden>
+                                        <input type="text" name="input-team-home" id="input-team-home" hidden>
+                                        <input type="text" name="input-team-away" id="input-team-away" hidden>
+                                        <input type="text" name="input-odd-home" id="input-odd-home" hidden>
+                                        <input type="text" name="input-odd-draw" id="input-odd-draw" hidden>
+                                        <input type="text" name="input-odd-away" id="input-odd-away" hidden>
+                                        <input type="text" name="input-id-league" id="input-id-league" hidden>
+                                        <input type="text" name="input-id-tipo" id="input-id-tipo" hidden>
+                                        <input type="text" name="input-date" id="input-date" hidden>
+                                        <div class="d-flex justify-content-center my-3">
+                                        </div>
+                                        <div class="input-group flex-nowrap">
+                                            <label for="valor-aposta" class="mx-5 my-3">Valor</label>
+                                            <input type="text" class="form-control w-50 my-3 mx-3" id="valor-aposta" name="valor-aposta">
+                                        </div>
+                                        <div class="input-group flex-nowrap">
+                                            <label for="retorno-aposta" class="mx-5 my-3">Retorno</label>
+                                            <input type="text" class="form-control w-50 my-3 mx-3" id="retorno-aposta" name="retorno-aposta" readonly>
+                                        </div>
+                                        <button type="button" id="gerar-retorno" class="btn btn-secondary my-3 mx-3">Gerar Retorno</button>
+                                        <button type="submit" class="btn btn-secondary my-3 mx-3" id="apostar-btn">Apostar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    {% load static %}
+    <script src="{% static 'app_unibet/apostas.js' %}"></script>
+  </body>
+</html>

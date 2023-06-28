@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Unibet</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
+    </head>
+<body>
+    {% include 'partials/header.html' %}
+    <table class="table table-striped">
+        <thead>
+            <th>Id</th>
+            <th>Time Casa</th>
+            <th>Time Fora</th>
+            <th>Tipo de Aposta</th>
+            <th>Odd</th>
+            <th>Valor</th>
+            <th>Retorno</th>
+            <th>Status</th>
+        </thead>
+        <tbody>
+            {% for aposta in apostas %}
+            <tr class="table-active">
+                <td>{{aposta.id_aposta}}</td>
+                {% for partida in partidas %}
+                    {% if aposta.id_partida_id == partida.id_partida %}
+                        <td>{{partida.time_casa}}</td>
+                        <td>{{partida.time_fora}}</td>
+                    {% endif %}
+                {% endfor %}
+
+                {% if aposta.id_tipo_id == 1 %}
+                    <td>Home Win</td>
+                {% elif aposta.id_tipo_id == 2 %}
+                    <td>Draw</td>
+                {% elif aposta.id_tipo_id == 3 %}
+                    <td>Away Win</td>
+                {% endif %}
+
+                {% for partida in partidas%}
+                    {% for odd in odds %}
+                        {% if partida.id_odds_id == odd.id_odds %}
+                            {% if aposta.id_tipo_id == 1 %}
+                                <td>{{ odd.odd_casa }}</td>
+                            {% elif aposta.id_tipo_id == 2 %}
+                                <td>{{ odd.odd_empate }}</td>
+                            {% elif aposta.id_tipo_id == 3 %}
+                                <td>{{ odd.odd_fora }}</td>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+                <td>R${{aposta.valor}}</td>
+                <td>R${{aposta.retorno}}</td>
+
+                {% if aposta.finalizada == null %}
+                <td>Aposta não finalizada</td>
+                <form method="get" action="{% url 'checar_status' %}">
+                    <input type="text" name="id_aposta" id="id_aposta" value="{{aposta.id_aposta}}" hidden>
+                    <td><button type="submit" class="btn btn-secondary">Checar status</button></td>
+                </form>
+                {% elif aposta.finalizada == 1 %}
+                    {% if aposta.resultado == 1 %}
+                        <td>Green</td>
+                    {% elif aposta.resultado == 0 %}
+                        <td>Red</td>
+                    {% endif %}
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
